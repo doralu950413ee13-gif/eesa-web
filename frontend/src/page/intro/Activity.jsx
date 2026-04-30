@@ -1,0 +1,119 @@
+import React from "react";
+import { Container, Row, Col } from "react-bootstrap";
+import { useNavigate, useParams } from "react-router-dom";
+import styles from "./Activities.module.css";
+import departments from "./departments.json";
+
+export default function Activity() {
+    const navigate = useNavigate();
+    const { slug, activitySlug } = useParams();
+    const data = departments[slug];
+
+    if (!data) {
+        return <div style={{ padding: 40 }}>找不到此部門：{slug}</div>;
+    }
+
+    const activities = data.activities || [];
+    const idx = activities.findIndex((a) => a.slug === activitySlug);
+
+    if (idx === -1) {
+        return <div style={{ padding: 40 }}>找不到此活動：{activitySlug}</div>;
+    }
+
+    const activity = activities[idx];
+    const prev = idx > 0 ? activities[idx - 1] : null;
+    const next = idx < activities.length - 1 ? activities[idx + 1] : null;
+
+    return (
+        <div className={styles.page}>
+            {/* Banner */}
+            <div className={styles.banner}>
+                <img
+                    src={data.bannerImage}
+                    alt={`${data.title} Banner`}
+                    className={styles.bannerImage}
+                />
+            </div>
+
+            <Container fluid className={styles.contentContainer}>
+                <Row>
+                    {/* Left Sidebar Navigation */}
+                    <Col md={2} className={styles.sidebarCol}>
+                        <div className={styles.sidebar}>
+                            <div className={styles.sidebarIcon}>
+                                <img src="/intro/all_inbox.svg" alt="inbox icon" />
+                            </div>
+                            <div
+                                className={styles.sidebarLabel}
+                                onClick={() => navigate("/intro/eesa-intro")}
+                                style={{ cursor: "pointer" }}
+                            >
+                                首頁
+                            </div>
+                            <div
+                                className={styles.sidebarLabel}
+                                onClick={() => navigate(`/intro/${slug}`)}
+                                style={{ cursor: "pointer" }}
+                            >
+                                部門介紹
+                            </div>
+                            <div
+                                className={styles.sidebarLabel}
+                                onClick={() => navigate(`/intro/${slug}/activities`)}
+                                style={{ cursor: "pointer" }}
+                            >
+                                部門活動
+                            </div>
+                        </div>
+                    </Col>
+
+                    {/* Main Content */}
+                    <Col md={10} className={styles.mainCol}>
+                        <section className={styles.activityDetail}>
+                            <h2 className={styles.activityTitle}>{activity.name}</h2>
+
+                            <div className={styles.contentRow}>
+                                <div className={styles.imageContainer}>
+                                    <img
+                                        src={activity.image}
+                                        alt={activity.name}
+                                        className={styles.activityImage}
+                                    />
+                                </div>
+                                <div className={styles.descriptionContainer}>
+                                    {activity.description.map((p, i) => (
+                                        <p key={i} className={styles.description}>
+                                            {p}
+                                        </p>
+                                    ))}
+                                </div>
+                            </div>
+                        </section>
+
+                        <div className={styles.bottomDivider}></div>
+
+                        {/* Navigation Buttons */}
+                        <div className={styles.navButtons}>
+                            {prev && (
+                                <div
+                                    className={styles.navButton}
+                                    onClick={() => navigate(`/intro/${slug}/activities/${prev.slug}`)}
+                                >
+                                    上一則
+                                </div>
+                            )}
+                            {next && (
+                                <div
+                                    className={`${styles.navButton} ${styles.navButtonsRight}`}
+                                    onClick={() => navigate(`/intro/${slug}/activities/${next.slug}`)}
+                                >
+                                    下一則
+                                </div>
+                            )}
+                        </div>
+                    </Col>
+                </Row>
+            </Container>
+        </div>
+    );
+}
